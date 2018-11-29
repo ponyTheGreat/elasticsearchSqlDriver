@@ -1,7 +1,6 @@
 package ge
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"errors"
 	"fmt"
@@ -14,8 +13,9 @@ type conn struct {
 }
 
 //Prepare to produce a Stmt
+//need to implemt check method for url, and sql query
+//so far the only Http method is POST
 func (c *conn) Prepare(query string) (driver.Stmt, error) {
-	//so far the only Http method is POST
 	stmt := &Stmt{
 		Method:   "POST",
 		SQLQuery: query,
@@ -37,7 +37,7 @@ func (c *conn) Begin() (driver.Tx, error) {
 }
 
 // Query to query DB with result
-func (c *conn) Query(query string) (*sql.Rows, error) {
+func (c *conn) Query(query string) (*driver.Rows, error) {
 	stmt, err := c.Prepare(query)
 	if err != nil {
 		panic(err)
@@ -46,8 +46,5 @@ func (c *conn) Query(query string) (*sql.Rows, error) {
 	if err != nil {
 		panic(err)
 	}
-
-	re := &sql.Rows{}
-	re.SetRowsi(result)
-	return re, nil
+	return &result, nil
 }
