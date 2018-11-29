@@ -1,4 +1,4 @@
-package go-elastic
+package ge
 
 import "errors"
 
