@@ -1,4 +1,4 @@
-package elasticsearchSqlDriver
+package go-elastic
 
 import (
 	"database/sql/driver"
