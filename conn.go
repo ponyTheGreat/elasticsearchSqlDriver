@@ -27,7 +27,6 @@ func (c *conn) Prepare(query string) (driver.Stmt, error) {
 
 //Close closes the Conn
 func (c *conn) Close() error {
-
 	return errors.New("Not implemented yet")
 }
 
@@ -40,11 +39,11 @@ func (c *conn) Begin() (driver.Tx, error) {
 func (c *conn) Query(query string) (*driver.Rows, error) {
 	stmt, err := c.Prepare(query)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	result, err := stmt.Query(nil)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return &result, nil
 }

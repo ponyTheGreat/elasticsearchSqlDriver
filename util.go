@@ -1,15 +1,13 @@
 package ge
 
 import (
-	"bufio"
+	"bytes"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -22,10 +20,10 @@ type column struct {
 const DefaultFetchSize int = 5
 
 //querywrapedQuery is http request body
-func sendHTTPRequestQuery(wrapedQuery, httpMethod, URL string) (*http.Response, error) {
-	request := stringToIR(wrapedQuery)
+func sendHTTPRequestQuery(request []byte, httpMethod, URL string) (*http.Response, error) {
+	requestReader := bytes.NewReader(request)
 	wrapURL := fmt.Sprintf("%s/_xpack/sql?format=json", URL)
-	res, err := http.NewRequest(httpMethod, wrapURL, request)
+	res, err := http.NewRequest(httpMethod, wrapURL, requestReader)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +39,15 @@ func sendHTTPRequestQuery(wrapedQuery, httpMethod, URL string) (*http.Response, 
 //last true:this is the last page, false:not the last page
 func sendHTTPRequestCursor(cursor, URL string, last bool) (*http.Response, error) {
 	client := &http.Client{}
-	requestBody := fmt.Sprintf("{\n\"cursor\":\"%s\"\n}", cursor)
+	cr := cursorRequest{
+		Cursor: cursor,
+	}
+	crj, err := json.Marshal(cr)
+	if err != nil {
+		return nil, err
+	}
+	cursorReader := bytes.NewReader(crj)
+
 	var wrapURL string
 	// not last page
 	if !last {
@@ -49,8 +55,7 @@ func sendHTTPRequestCursor(cursor, URL string, last bool) (*http.Response, error
 	} else {
 		wrapURL = fmt.Sprintf("%s/_xpack/sql/close", URL)
 	}
-	requestBodyReader := stringToIR(requestBody)
-	request, err := http.NewRequest("POST", wrapURL, requestBodyReader)
+	request, err := http.NewRequest("POST", wrapURL, cursorReader)
 	if err != nil {
 		return nil, err
 	}
@@ -71,11 +76,12 @@ func readHTTPResponse(res *http.Response) ([]byte, error) {
 	return result, nil
 }
 
-//convert string to io.Reader
-func stringToIR(str string) io.Reader {
-	str1 := strings.NewReader(str)
-	result := bufio.NewReader(str1)
-	return result
+type requestBody struct {
+	Query     string `json:"query"`
+	FetchSize int    `json:"fetch_size"`
+}
+type cursorRequest struct {
+	Cursor string `json:"cursor"`
 }
 
 //outType define the recieve type of json in http reaspons
@@ -96,33 +102,6 @@ func getRows(columns []column, rows [][]interface{}, Cursor string, URL string) 
 		url:            URL,
 	}
 	return re
-}
-
-//MakeLines split string by lines
-func MakeLines(s string) []string {
-	lines := strings.Split(s, "\n")
-	return lines
-}
-
-//SubString for get a substring start with c1, end with c2 from a string
-func SubString(src string, c1, c2 rune) (string, error) {
-	i := -1
-	j := -1
-	for index, cont := range src {
-		if cont == c1 {
-			i = index
-		}
-		if cont == c2 {
-			j = index
-		}
-	}
-	if i == -1 || j == -1 {
-		return "", errors.New("no char found")
-	}
-	if i > j {
-		return "", errors.New("no substring")
-	}
-	return src[i:j], nil
 }
 
 func jsonDecode(sample []byte) (*outType, error) {
@@ -149,5 +128,5 @@ func convertToValue(data interface{}, typeName string) (driver.Value, error) {
 		}
 		return t, nil
 	}
-	return data.(driver.Value), nil
+	return data, nil
 }
