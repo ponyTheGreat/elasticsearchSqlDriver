@@ -7,11 +7,11 @@ import (
 	"strings"
 )
 
-// struct
-type elastic struct{}
+//Elastic Driver
+type Elastic struct{}
 
 //Open for driver return a connection of DB
-func (d *elastic) Open(dsn string) (driver.Conn, error) {
+func (d *Elastic) Open(dsn string) (driver.Conn, error) {
 	content := strings.Split(dsn, ":")
 	hostName := content[0]
 	port := content[1]
@@ -23,6 +23,6 @@ func (d *elastic) Open(dsn string) (driver.Conn, error) {
 }
 
 func init() {
-	sql.Register("elastic", &elastic{})
+	sql.Register("elastic", &Elastic{})
 	fmt.Println("register successfully")
 }

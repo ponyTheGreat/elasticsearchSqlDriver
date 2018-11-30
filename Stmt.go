@@ -48,7 +48,7 @@ func (stmt *Stmt) Exec(args []driver.Value) (driver.Result, error) {
 func (stmt *Stmt) Query(args []driver.Value) (driver.Rows, error) {
 	fetchSizeQuery := fmt.Sprintf("\"fetch_size\": %d", DefaultFetchSize)
 	requestBody := fmt.Sprintf("{\n  \"query\":\"%s\",\n  %s\n}", stmt.SQLQuery, fetchSizeQuery)
-	resp, err := sendHTTPRequestQuery(requestBody, "POST", stmt.URL)
+	resp, err := sendHTTPRequestQuery([]byte(requestBody), "POST", stmt.URL)
 	if err != nil {
 		return nil, err
 	}
