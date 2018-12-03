@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestScussPrepare(t *testing.T) {
+func TestSuccessPrepare(t *testing.T) {
 	con := &conn{
 		host:    "localhost",
 		portnum: "9200",
@@ -21,4 +21,3 @@ func TestScussPrepare(t *testing.T) {
 		t.Error("Excepted: \"http://localhost:9200\" got:", stmt.(*Stmt).URL)
 	}
 }
-

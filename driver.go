@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-// struct
+//Elastic for driver
 type Elastic struct{}
 
 //Open for driver return a connection of DB
