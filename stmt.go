@@ -4,7 +4,6 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
-	"fmt"
 )
 
 // Stmt prepare
@@ -46,17 +45,37 @@ func (stmt *Stmt) Exec(args []driver.Value) (driver.Result, error) {
 //
 // Deprecated: Drivers should implement StmtQueryContext instead (or additionally).
 func (stmt *Stmt) Query(args []driver.Value) (driver.Rows, error) {
-	fetchSizeQuery := fmt.Sprintf("\"fetch_size\": %d", DefaultFetchSize)
-	requestBody := fmt.Sprintf("{\n  \"query\":\"%s\",\n  %s\n}", stmt.SQLQuery, fetchSizeQuery)
-	resp, err := sendHTTPRequestQuery([]byte(requestBody), "POST", stmt.URL)
+	type requestBody struct {
+		Query     string `json:"query"`
+		FetchSize int    `json:"fetch_size"`
+	}
+
+	temp := requestBody{
+		Query:     stmt.SQLQuery,
+		FetchSize: 5,
+	}
+
+	request, err := json.Marshal(temp)
+	if err != nil {
+		return nil, err
+	}
+
+	//fetchSizeQuery := fmt.Sprintf("\"fetch_size\": %d", DefaultFetchSize)
+	//requestBody := fmt.Sprintf("{\n  \"query\":\"%s\",\n  %s\n}", stmt.SQLQuery, fetchSizeQuery)
+
+	//fmt.Println(string(request))
+	resp, err := sendHTTPRequestQuery(request, "POST", stmt.URL)
+
 	if err != nil {
 		return nil, err
 	}
 	respBytes, err := readHTTPResponse(resp)
+	//fmt.Println(string(respBytes))
 	var c outType
 	if err := json.Unmarshal(respBytes, &c); err != nil {
 		return nil, err
 	}
 	result := getRows(c.Columns, c.Rows, c.Cursor, stmt.URL)
+	//fmt.Println(&result)
 	return &result, nil
 }

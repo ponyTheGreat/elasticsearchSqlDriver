@@ -3,7 +3,6 @@ package ge
 import (
 	"database/sql"
 	"fmt"
-	"math"
 	"testing"
 	"time"
 )
@@ -17,6 +16,7 @@ var (
 )
 
 func TestColumNames(t *testing.T) {
+	initTestData()
 	coltypeStandare := []string{"BOOLEAN", "TIMESTAMP", "REAL", "INTEGER", "VARCHAR"}
 	tempQuery := "SHOW COLUMNS FROM testdata"
 	db, err := sql.Open("elastic", "localhost:9200")
@@ -40,22 +40,47 @@ func TestColumNames(t *testing.T) {
 		i++
 		fmt.Println(a1, a2)
 	}
-
+	clearTestData()
 }
 
 func TestValues(t *testing.T) {
-	tempQuery1 := "SELECT * FROM testdata"
-	db, err := sql.Open("elastic", "localhost:9200")
-	defer db.Close()
-	if err != nil {
-		t.Error(err)
-	}
-	rows, err := db.Query(tempQuery1)
-	if err != nil {
-		t.Error(err)
-	}
-	for rows.Next() {
+	initTestData()
+	/*
+		requestBody := `{
+				"query":"SELECT * FROM testdata"
+				}`
+		reqR := bytes.NewReader([]byte(requestBody))
+		url := "http://localhost:9200/_xpack/sql?format=json"
+		request, err := http.NewRequest("POST", url, reqR)
+		if err != nil {
+			panic(err)
+		}
+		request.Header.Add("Content-Type", "application/json")
+		client := http.Client{}
 
+		res, err := client.Do(request)
+		if err != nil {
+			panic(err)
+		}
+		resp, err := readHTTPResponse(res)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(resp))
+	*/
+	db, err := sql.Open("elastic", "localhost:9200")
+	if err != nil {
+		t.Error(err)
+	}
+	//fmt.Println(db)
+	defer db.Close()
+	rows, err := db.Query("SELECT * FROM testdata")
+	if err != nil {
+		t.Error(err)
+	}
+	//fmt.Println(rows)
+	for rows.Next() {
+		//time.Sleep(time.Duration(1) * time.Second)
 		if err := rows.Scan(&a1, &a2, &a3, &a4, &a5); err != nil {
 			t.Error(err)
 		}
@@ -71,21 +96,15 @@ func TestValues(t *testing.T) {
 			}
 		}
 
-		if toFixed(a3.(float64), 7) != 3.1415927 {
-			t.Error("Excepted: 3.1415927, got: ", toFixed(a3.(float64), 7))
-		}
-
 		if a5 != "Hello World!" {
 			t.Error("Excepted: Hello World! got: ", a5)
 		}
-		fmt.Println(a1, a2, toFixed(a3.(float64), 7), a4, a5)
+		fmt.Println(a1, a2, a3, a4, a5)
 	}
+
+	clearTestData()
 }
 
-func toFixed(num float64, precision int) float64 {
-	output := math.Pow(10, float64(precision))
-	return float64(round(num*output)) / output
-}
-func round(num float64) int {
-	return int(num + math.Copysign(0.5, num))
-}
+//1. if the last digit <5, then dont keep it
+//2. if the last digit ==5 and there is none zero digits behind ,then see if the it is odd ，digit up, if it is even dont keep it
+//3. if the last digit ==5 and there is none zero digit > 5, digit up

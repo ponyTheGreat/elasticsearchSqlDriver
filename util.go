@@ -23,21 +23,27 @@ const DefaultFetchSize int = 5
 func sendHTTPRequestQuery(request []byte, httpMethod, URL string) (*http.Response, error) {
 	requestReader := bytes.NewReader(request)
 	wrapURL := fmt.Sprintf("%s/_xpack/sql?format=json", URL)
+	//fmt.Println(wrapURL)
+	//fmt.Println(string(request))
+	//fmt.Println(httpMethod)
 	res, err := http.NewRequest(httpMethod, wrapURL, requestReader)
 	if err != nil {
 		return nil, err
 	}
 	res.Header.Add("Content-Type", "application/json")
 	client1 := &http.Client{}
+
 	response, err := client1.Do(res)
+	fmt.Println()
 	if err != nil {
 		return nil, err
 	}
+
 	return response, nil
 }
 
 //last true:this is the last page, false:not the last page
-func sendHTTPRequestCursor(cursor, URL string, last bool) (*http.Response, error) {
+func sendHTTPRequestCursor(cursor, URL string) (*http.Response, error) {
 	client := &http.Client{}
 	cr := cursorRequest{
 		Cursor: cursor,
@@ -50,11 +56,9 @@ func sendHTTPRequestCursor(cursor, URL string, last bool) (*http.Response, error
 
 	var wrapURL string
 	// not last page
-	if !last {
-		wrapURL = fmt.Sprintf("%s/_xpack/sql?format=json", URL)
-	} else {
-		wrapURL = fmt.Sprintf("%s/_xpack/sql/close", URL)
-	}
+
+	wrapURL = fmt.Sprintf("%s/_xpack/sql?format=json", URL)
+
 	request, err := http.NewRequest("POST", wrapURL, cursorReader)
 	if err != nil {
 		return nil, err
@@ -101,6 +105,7 @@ func getRows(columns []column, rows [][]interface{}, Cursor string, URL string) 
 		cursor:         Cursor,
 		url:            URL,
 	}
+	//fmt.Println(re.RowsContent) //
 	return re
 }
 
@@ -130,5 +135,3 @@ func convertToValue(data interface{}, typeName string) (driver.Value, error) {
 	}
 	return data, nil
 }
-
-

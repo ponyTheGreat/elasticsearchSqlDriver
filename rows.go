@@ -2,7 +2,6 @@ package ge
 
 import (
 	"database/sql/driver"
-	"errors"
 	"io"
 	"net/http"
 )
@@ -31,11 +30,8 @@ func (r *Rows) Columns() []string {
 }
 
 // Close closes the rows iterator.
+//https://www.elastic.co/guide/en/elasticsearch/reference/6.5/sql-rest.html
 func (r *Rows) Close() error {
-	if r.Closed == true {
-		return errors.New("Rows Closed alredy")
-	}
-	r.Closed = true
 	return nil
 }
 
@@ -49,11 +45,11 @@ func (r *Rows) Close() error {
 // should be taken when closing Rows not to modify
 // a buffer held in dest.
 func (r *Rows) Next(dest []driver.Value) error {
-	if r.Cur >= len(r.RowsContent)-1 {
+	if r.Cur >= len(r.RowsContent) {
 		var result *http.Response
 		var err error
 		if r.cursor != "" {
-			result, err = sendHTTPRequestCursor(r.cursor, r.url, false)
+			result, err = sendHTTPRequestCursor(r.cursor, r.url)
 			if err != nil {
 				return err
 			}
