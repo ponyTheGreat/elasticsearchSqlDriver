@@ -18,7 +18,6 @@ type Rows struct {
 	fetchSize   int
 	cursor      string
 	url         string
-	IndexName   string
 }
 
 // Columns returns the names of the columns. The number of

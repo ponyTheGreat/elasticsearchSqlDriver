@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestSuccessPrepare(t *testing.T) {
+func TestPrepare(t *testing.T) {
 	con := &conn{
 		host:    "localhost",
 		portnum: "9200",
@@ -19,5 +19,20 @@ func TestSuccessPrepare(t *testing.T) {
 	}
 	if stmt.(*Stmt).URL != "http://localhost:9200" {
 		t.Error("Excepted: \"http://localhost:9200\" got:", stmt.(*Stmt).URL)
+	}
+}
+
+func TestConnQuery(t *testing.T) {
+	initTestData()
+	con := &conn{
+		host:    "localhost",
+		portnum: "9200",
+	}
+	result, err := con.Query("SELECT * FROM testdata")
+	if err != nil {
+		t.Error(err)
+	}
+	if result == nil {
+		t.Error("no return")
 	}
 }

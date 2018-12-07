@@ -135,7 +135,3 @@ func convertToValue(data interface{}, typeName string) (driver.Value, error) {
 	}
 	return data, nil
 }
-
-type simpRequest struct {
-	query string
-}

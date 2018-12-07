@@ -1,10 +1,8 @@
 package ge
 
 import (
-	"bytes"
 	"database/sql"
 	"fmt"
-	"net/http"
 	"testing"
 	"time"
 )
@@ -17,7 +15,6 @@ var (
 	a5 interface{}
 )
 
-/*
 func TestColumNames(t *testing.T) {
 	initTestData()
 	coltypeStandare := []string{"BOOLEAN", "TIMESTAMP", "REAL", "INTEGER", "VARCHAR"}
@@ -41,36 +38,35 @@ func TestColumNames(t *testing.T) {
 			t.Error("Excepted: ", coltypeStandare[i])
 		}
 		i++
-		fmt.Println(a1, a2)
 	}
 	clearTestData()
 }
-*/
 
 func TestValues(t *testing.T) {
 	initTestData()
+	/*
+			requestBody := `{
+						"query":"SELECT * FROM testdata"
+						}`
+			reqR := bytes.NewReader([]byte(requestBody))
+			url := "http://localhost:9200/_xpack/sql?format=json"
+			request, err := http.NewRequest("POST", url, reqR)
+			if err != nil {
+				panic(err)
+			}
+			request.Header.Add("Content-Type", "application/json")
+			client := http.Client{}
 
-	requestBody := `{
-				"query":"SELECT * FROM testdata"
-				}`
-	reqR := bytes.NewReader([]byte(requestBody))
-	url := "http://localhost:9200/_xpack/sql?format=json"
-	request, err := http.NewRequest("POST", url, reqR)
-	if err != nil {
-		panic(err)
-	}
-	request.Header.Add("Content-Type", "application/json")
-	client := http.Client{}
-
-	res, err := client.Do(request)
-	if err != nil {
-		panic(err)
-	}
-	resp, err := readHTTPResponse(res)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(resp))
+			res, err := client.Do(request)
+			if err != nil {
+				panic(err)
+			}
+			resp, err := readHTTPResponse(res)
+			if err != nil {
+				panic(err)
+			}
+		fmt.Println(string(resp))
+	*/
 
 	db, err := sql.Open("elastic", "localhost:9200")
 	if err != nil {

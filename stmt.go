@@ -77,5 +77,6 @@ func (stmt *Stmt) Query(args []driver.Value) (driver.Rows, error) {
 	//fmt.Println(c.Columns[2].Coltype)
 
 	result := getRows(c.Columns, c.Rows, c.Cursor, stmt.URL)
+
 	return &result, nil
 }

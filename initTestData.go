@@ -2,7 +2,6 @@ package ge
 
 import (
 	"bytes"
-	"database/sql"
 	"net/http"
 	"time"
 )
@@ -82,6 +81,11 @@ func initTestData() {
 	testdataCreat()
 	insertDoc1()
 	insertDoc1()
+	insertDoc1()
+	insertDoc1()
+	insertDoc1()
+	insertDoc1()
+	insertDoc1()
 	time.Sleep(time.Duration(1) * time.Second)
 }
 
@@ -98,10 +102,21 @@ func clearTestData() {
 	}
 
 }
+
+/*
 func getTestDb() *sql.DB {
 	db, err := sql.Open("elastic", "localhost:9200")
 	if err != nil {
 		panic(err)
 	}
 	return db
+}
+*/
+func getStmt(query, url string) *Stmt {
+	stmt := Stmt{
+		Method:   "POST",
+		SQLQuery: query,
+		URL:      url,
+	}
+	return &stmt
 }
