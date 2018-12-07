@@ -20,11 +20,11 @@ type column struct {
 const DefaultFetchSize int = 5
 
 //querywrapedQuery is http request body
+//URL:http://localhost:9200
 func sendHTTPRequestQuery(request []byte, httpMethod, URL string) (*http.Response, error) {
 	requestReader := bytes.NewReader(request)
 	wrapURL := fmt.Sprintf("%s/_xpack/sql?format=json", URL)
 	//fmt.Println(wrapURL)
-	//fmt.Println(string(request))
 	//fmt.Println(httpMethod)
 	res, err := http.NewRequest(httpMethod, wrapURL, requestReader)
 	if err != nil {
@@ -134,4 +134,8 @@ func convertToValue(data interface{}, typeName string) (driver.Value, error) {
 		return t, nil
 	}
 	return data, nil
+}
+
+type simpRequest struct {
+	query string
 }

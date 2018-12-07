@@ -70,11 +70,11 @@ func (stmt *Stmt) Query(args []driver.Value) (driver.Rows, error) {
 		return nil, err
 	}
 	respBytes, err := readHTTPResponse(resp)
-	//fmt.Println(string(respBytes))
 	var c outType
 	if err := json.Unmarshal(respBytes, &c); err != nil {
 		return nil, err
 	}
+	//fmt.Println(c.Columns[2].Coltype)
 	result := getRows(c.Columns, c.Rows, c.Cursor, stmt.URL)
 	//fmt.Println(&result)
 	return &result, nil

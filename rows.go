@@ -4,17 +4,20 @@ import (
 	"database/sql/driver"
 	"io"
 	"net/http"
+	"strings"
 )
 
 // Rows contain the result
 type Rows struct {
 	ColumnsContent []column
-	RowsContent    [][]interface{}
-	Cur            int
-	Closed         bool
-	fetchSize      int
-	cursor         string
-	url            string
+	//ColumnsType    []string //database system typenames
+	RowsContent [][]interface{}
+	Cur         int
+	Closed      bool
+	fetchSize   int
+	cursor      string
+	url         string
+	IndexName   string
 }
 
 // Columns returns the names of the columns. The number of
@@ -94,4 +97,19 @@ func (r *Rows) Next(dest []driver.Value) error {
 		r.Cur++
 	}
 	return nil
+}
+
+// RowsColumnTypeDatabaseTypeName may be implemented by Rows. It should return the
+// database system type name without the length. Type names should be uppercase.
+// Examples of returned types: "VARCHAR", "NVARCHAR", "VARCHAR2", "CHAR", "TEXT",
+// "DECIMAL", "SMALLINT", "INT", "BIGINT", "BOOL", "[]BIGINT", "JSONB", "XML",
+// "TIMESTAMP".
+type RowsColumnTypeDatabaseTypeName struct {
+	Rows Rows
+}
+
+//ColumnTypeDatabaseTypeName should return the database system type name without the length.
+func (rct *RowsColumnTypeDatabaseTypeName) ColumnTypeDatabaseTypeName(index int) string {
+	temp := ((rct.Rows).ColumnsContent)[index].Coltype
+	return strings.ToUpper(temp)
 }
