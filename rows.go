@@ -4,6 +4,7 @@ import (
 	"database/sql/driver"
 	"io"
 	"net/http"
+	"reflect"
 	"strings"
 )
 
@@ -112,4 +113,15 @@ type RowsColumnTypeDatabaseTypeName struct {
 func (rct *RowsColumnTypeDatabaseTypeName) ColumnTypeDatabaseTypeName(index int) string {
 	temp := ((rct.Rows).ColumnsContent)[index].Coltype
 	return strings.ToUpper(temp)
+}
+
+// RowsColumnTypeScanType may be implemented by Rows.
+type RowsColumnTypeScanType struct {
+	Rows Rows
+}
+
+//ColumnTypeScanType should return the value type that can be used to scan types into.
+// For example, the database column type "bigint" this should return "reflect.TypeOf(int64(0))".
+func (rcts *RowsColumnTypeScanType) ColumnTypeScanType(index int) reflect.Type {
+	return reflect.TypeOf((rcts.Rows.RowsContent)[0][index])
 }
